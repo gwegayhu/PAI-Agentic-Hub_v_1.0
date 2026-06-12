@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PragMind Agentic Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0C10;--bg2:#10131A;--bg3:#161B25;--bg4:#0D1018;
+  --border:#1E2535;--border2:#252D40;
+  --text:#E8EDF5;--muted:#6B7A99;--dim:#3A4560;
+  --green:#2EC67A;--red:#E05555;--amber:#E0A835;
+  --mono:'IBM Plex Mono',monospace;--sans:'Sora',sans-serif;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--sans);background:var(--bg);color:var(--text)}
+#app{display:grid;grid-template-columns:228px 1fr;height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-brand{padding:22px 18px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.brand-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.brand-name{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-.1px}
+.brand-sub{font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:3px}
+.sidebar-section{padding:14px 10px 4px;flex-shrink:0}
+.section-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;padding:0 8px;margin-bottom:6px}
+.agent-btn{width:100%;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;border:1px solid transparent;background:transparent;cursor:pointer;transition:background .12s,border-color .12s;margin-bottom:2px;text-align:left}
+.agent-btn:hover{background:var(--bg3)}
+.agent-btn.active{background:var(--bg3);border-color:var(--border2)}
+.a-icon-wrap{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.a-info{flex:1;min-width:0}
+.a-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a-role{font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agent-btn.active .a-name{color:#fff}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;opacity:.7}
+.sidebar-divider{height:1px;background:var(--border);margin:8px 18px}
+.sidebar-footer{padding:14px 18px;margin-top:auto;flex-shrink:0}
+.sf-line{font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.7}
+.sf-conn{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;margin-top:6px;cursor:pointer;padding:4px 6px;border-radius:4px;transition:background .12s}
+.sf-conn:hover{background:var(--bg3)}
+.sf-conn-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.sf-conn-label{color:var(--muted)}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.topbar{display:flex;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid var(--border);flex-shrink:0}
+.topbar-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.topbar-meta{flex:1}
+.topbar-name{font-size:16px;font-weight:700;letter-spacing:-.2px}
+.topbar-role{font-size:11px;color:var(--muted);margin-top:1px}
+.topbar-tags{display:flex;gap:5px;align-items:center}
+.tag{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:4px;border:1px solid;letter-spacing:.04em}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.btn-ghost{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .12s;letter-spacing:.04em}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+
+/* BODY SPLIT */
+.body-area{display:flex;flex:1;overflow:hidden}
+.info-panel{width:310px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--bg2)}
+.info-panel::-webkit-scrollbar{width:3px}
+.info-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.info-section{padding:14px 16px;border-bottom:1px solid var(--border)}
+.info-title{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.info-title-dot{width:5px;height:5px;border-radius:50%}
+.green-title .info-title-dot{background:var(--green)}.green-title{color:var(--green)}
+.red-title .info-title-dot{background:var(--red)}.red-title{color:var(--red)}
+.amber-title .info-title-dot{background:var(--amber)}.amber-title{color:var(--amber)}
+.muted-title{color:var(--muted)}
+.do-list,.dont-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.do-item,.dont-item{display:flex;gap:8px;font-size:11px;line-height:1.5;align-items:flex-start}
+.item-mark{flex-shrink:0;margin-top:1px;font-size:12px}
+.do-item .item-mark{color:var(--green)}
+.dont-item .item-mark{color:var(--red)}
+.item-text{color:#A8BEDD}
+.item-text strong{color:var(--text);font-weight:500}
+.schema-item{background:var(--bg3);border-radius:7px;padding:10px 12px;border:1px solid var(--border);margin-bottom:8px}
+.schema-lbl{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.schema-val{font-size:11px;color:#9BABC8;line-height:1.6}
+.tool-row{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.tool-badge{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;display:flex;align-items:center;gap:4px;font-weight:500}
+.tool-ok{background:rgba(46,198,122,.08);color:var(--green);border:1px solid rgba(46,198,122,.2)}
+.tool-no{background:rgba(224,85,85,.08);color:var(--red);border:1px solid rgba(224,85,85,.2)}
+.esc-item{background:var(--bg3);border-radius:7px;padding:10px 12px;border:1px solid var(--border);border-left:3px solid var(--amber);margin-bottom:7px}
+.esc-trigger{font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:.04em;margin-bottom:4px}
+.esc-action{font-size:11px;color:#9BABC8;line-height:1.5}
+
+/* CHAT */
+.chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.onboarding{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center}
+.ob-icon{font-size:48px;margin-bottom:16px}
+.ob-name{font-size:20px;font-weight:700;letter-spacing:-.2px;margin-bottom:6px}
+.ob-mission{font-size:13px;color:#9BABC8;line-height:1.65;max-width:500px;margin:0 auto 20px}
+.ob-cards{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;justify-content:center;max-width:540px}
+.ob-card{flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left}
+.ob-card-title{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+.ob-card-title.needs{color:var(--green)}.ob-card-title.wont{color:var(--red)}
+.ob-card ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+.ob-card ul li{font-size:11px;color:#9BABC8;line-height:1.5;display:flex;gap:5px;align-items:flex-start}
+.ob-card ul li::before{content:"·";color:var(--dim);flex-shrink:0}
+.ob-scenario-btn{font-family:var(--mono);font-size:10px;padding:8px 16px;border-radius:7px;border:1px solid;cursor:pointer;transition:all .15s;letter-spacing:.04em}
+.ob-scenario-btn:hover{filter:brightness(1.15)}
+.messages{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+.messages::-webkit-scrollbar{width:3px}
+.messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.msg-user{display:flex;justify-content:flex-end}
+.msg-user .bubble{background:var(--bg3);border:1px solid var(--border2);border-radius:12px 12px 3px 12px;padding:11px 15px;max-width:72%;font-size:13px;line-height:1.6;color:var(--text)}
+.msg-agent{display:flex;flex-direction:column;gap:5px}
+.agent-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-left:2px}
+.agent-bubble{background:var(--bg2);border:1px solid var(--border);border-radius:3px 12px 12px 12px;padding:14px 16px;font-size:13px;line-height:1.75;color:#C8D8EE;max-width:96%}
+.agent-bubble h3{font-size:13px;font-weight:600;color:var(--text);margin:14px 0 6px}.agent-bubble h3:first-child{margin-top:0}
+.agent-bubble strong{color:var(--text);font-weight:600}
+.agent-bubble em{color:#9BABC8}
+.agent-bubble ul,.agent-bubble ol{padding-left:20px;margin:8px 0;display:flex;flex-direction:column;gap:4px}
+.agent-bubble li{font-size:12px;line-height:1.6;color:#9BABC8}
+.agent-bubble table{width:100%;border-collapse:collapse;margin:10px 0;font-size:11.5px}
+.agent-bubble th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:7px 10px;border-bottom:1px solid var(--border);text-align:left;background:var(--bg3)}
+.agent-bubble td{padding:7px 10px;border-bottom:1px solid var(--border);color:#A8BEDD;line-height:1.5}
+.agent-bubble td:first-child{color:var(--text);font-weight:500}
+.agent-bubble pre,.agent-bubble code{font-family:var(--mono);font-size:11px;background:var(--bg4);border:1px solid var(--border);border-radius:5px;padding:2px 6px;color:#8BA8CC}
+.agent-bubble pre{padding:11px 14px;display:block;overflow-x:auto;line-height:1.7;margin:8px 0}
+.agent-bubble pre code{background:none;border:none;padding:0}
+.agent-bubble p{margin-bottom:8px}.agent-bubble p:last-child{margin-bottom:0}
+.agent-bubble hr{border:none;border-top:1px solid var(--border);margin:10px 0}
+
+/* ROUTING BADGE — shows which agent handled the request in hub mode */
+.routing-badge{font-family:var(--mono);font-size:9px;color:var(--dim);padding:3px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;display:inline-flex;align-items:center;gap:5px;margin-bottom:6px}
+.routing-badge-dot{width:4px;height:4px;border-radius:50%}
+
+/* ESCALATION BANNERS */
+.esc-banner{border-radius:8px;padding:9px 13px;margin-bottom:8px;font-size:12px;line-height:1.5;border:1px solid}
+.esc-escalation{background:rgba(224,168,53,.08);border-color:rgba(224,168,53,.3);color:var(--amber)}
+.esc-clarification{background:rgba(74,158,219,.08);border-color:rgba(74,158,219,.3);color:#4A9EDB}
+.esc-anomaly{background:rgba(224,85,85,.08);border-color:rgba(224,85,85,.3);color:var(--red)}
+.esc-draft{background:rgba(107,122,153,.08);border-color:rgba(107,122,153,.3);color:#9BABC8}
+.esc-banner-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;opacity:.8}
+
+/* TYPING */
+.typing{display:flex;align-items:center;gap:5px;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:3px 12px 12px 12px;width:fit-content}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--dim);animation:pulse 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{opacity:.2}40%{opacity:1}}
+
+/* INPUT BAR */
+.input-bar{padding:14px 24px 20px;border-top:1px solid var(--border);background:var(--bg);flex-shrink:0}
+.input-wrap{display:flex;gap:10px;align-items:flex-end;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;transition:border-color .15s}
+.input-wrap:focus-within{border-color:var(--border)}
+.input-box{flex:1;background:transparent;border:none;outline:none;font-family:var(--sans);font-size:13px;color:var(--text);resize:none;min-height:22px;max-height:140px;line-height:1.6;overflow-y:auto}
+.input-box::placeholder{color:var(--dim)}
+.input-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.send-btn{height:36px;padding:0 16px;border-radius:7px;border:none;cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .15s;flex-shrink:0}
+.send-btn:hover{filter:brightness(1.1)}.send-btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+.input-hint{font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:7px;letter-spacing:.04em}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px 32px;width:480px;max-width:92vw}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:6px}
+.modal-sub{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:20px}
+.modal-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;display:block}
+.modal-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;transition:border-color .12s;margin-bottom:8px}
+.modal-input:focus{border-color:var(--border)}
+.modal-note{font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.6}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.btn-primary{font-family:var(--sans);font-size:12px;font-weight:600;padding:9px 20px;border-radius:7px;border:none;cursor:pointer;background:#1E3A5A;color:#4A9EDB;transition:all .15s}
+.btn-primary:hover{background:#254870}
+.mode-btn{flex:1;padding:10px;border-radius:7px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;cursor:pointer;transition:all .15s}
+.mode-btn.on{border:1px solid #4A9EDB;background:rgba(74,158,219,.12);color:#4A9EDB;font-weight:600}
+.mode-btn.off{border:1px solid var(--border);background:transparent;color:var(--muted)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px 16px;font-size:12px;color:var(--text);z-index:200;animation:slideUp .2s ease;font-family:var(--mono)}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- SETUP MODAL -->
+<div class="modal-bg" id="setupModal">
+  <div class="modal">
+    <div class="modal-title">Connect PragMind Hub</div>
+    <div class="modal-sub">Choose how to run the agents. Backend mode routes calls through your LangGraph FastAPI server. Direct mode calls OpenAI from the browser.</div>
+
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <button class="mode-btn on" id="modeBackendBtn" onclick="setMode('backend')">● BACKEND MODE</button>
+      <button class="mode-btn off" id="modeDirectBtn" onclick="setMode('direct')">○ DIRECT MODE</button>
+    </div>
+
+    <div id="backendSection">
+      <label class="modal-label">FastAPI Backend URL</label>
+      <input class="modal-input" id="backendUrlInput" type="text" placeholder="http://localhost:8000" value="http://localhost:8000">
+      <div class="modal-note" style="margin-bottom:10px">Start the backend: <strong>cd pragmind_hub && python main.py</strong><br>Render deployment: <strong>https://your-app.onrender.com</strong></div>
+      <div id="healthResult" style="font-family:var(--mono);font-size:10px;color:var(--dim);min-height:16px"></div>
+      <button onclick="checkHealth()" style="margin-top:6px;font-family:var(--mono);font-size:9px;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;letter-spacing:.06em">
+        CHECK CONNECTION
+      </button>
+    </div>
+
+    <div id="directSection" class="hidden">
+      <label class="modal-label">OpenAI API Key</label>
+      <input class="modal-input" id="apiKeyInput" type="password" placeholder="sk-proj-...">
+      <div class="modal-note">Used only for calls to api.openai.com with gpt-4o. Session-only — never persisted.</div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn-primary" onclick="saveConfig()">Launch Hub →</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-eyebrow">PragMind AI</div>
+      <div class="brand-name">Agentic Hub</div>
+      <div class="brand-sub">Dubai · Enterprise AI</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="section-label">5 Agents</div>
+      <div id="agentNav"></div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-footer">
+      <div class="sf-line">All agents v1.0<br>Internal operations only</div>
+      <div class="sf-conn" id="connStatus" onclick="openSetup()" title="Click to change connection">
+        <div class="sf-conn-dot" id="connDot" style="background:var(--dim)"></div>
+        <span class="sf-conn-label" id="connLabel">not connected</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar" id="topbar"></div>
+    <div class="body-area">
+      <div class="info-panel" id="infoPanel"></div>
+      <div class="chat-area" id="chatArea">
+        <div class="messages" id="messages"></div>
+        <div class="input-bar">
+          <div class="input-wrap">
+            <textarea class="input-box" id="inputBox" placeholder="Describe the client, paste discovery notes, or ask a question..." rows="1"
+              onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+            <div class="input-actions">
+              <button class="btn-ghost" onclick="clearConversation()" style="height:36px">Clear</button>
+              <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 7L13 1L7 13L6 8L1 7Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                Send
+              </button>
+            </div>
+          </div>
+          <div class="input-hint" id="inputHint"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// AGENT DATA
+// ═══════════════════════════════════════════════════════════
+const AGENTS = [
+  {
+    id:'axiom', icon:'🧭', name:'Axiom', role:'AI Readiness Agent',
+    color:'#1A3A5C', accent:'#4A9EDB',
+    mission:"Conducts structured AI Readiness Assessments. Scores maturity across 5 dimensions, produces a prioritised adoption roadmap, maps findings to PragMind's service portfolio.",
+    tags:[{t:'AI Strategy',c:'#4A9EDB'},{t:'Consulting',c:'#4A9EDB'},{t:'Discovery',c:'#6B7A99'}],
+    inputHint:'Provide: client industry, company size, tech stack, top 3 goals, data infrastructure, AI initiatives attempted, budget signal (high/medium/low)',
+    needs:['Client industry + company size','Current tech stack and data infrastructure','Top 3 business goals','AI initiatives attempted (if any)','Budget signal (high / medium / low)'],
+    wont:['Promise ROI or specific outcomes','Give technical implementation advice'],
+    scenario:"Run Axiom for a 200-person logistics company in Dubai: they use 3 separate ERP systems (none integrated), store data in Excel, have one IT generalist, the CEO wants AI for route optimisation and delivery prediction, no data privacy policy exists, they've tried one chatbot that failed, budget is medium.",
+    schema_in:'Client industry + company size + tech stack + top 3 goals + data infra + AI initiatives + budget signal',
+    schema_out:'AI Readiness Score (0–100) + 5-dimension breakdown + maturity tier + risk flags + top 3 service recommendations + 90-day roadmap',
+    tools_ok:['GPT-4o (reasoning)','Typeform intake form','Notion output template','Make.com trigger'],
+    tools_no:['CRM write access','Any client financial system','Live database connections','Code execution'],
+    escalate:[
+      {t:'Dimension score is ambiguous',a:"Flag as 'Insufficient data — requires human consultant clarification'. Note exactly what is missing."},
+      {t:'Client describes regulated domain (healthcare, finance, legal)',a:"Complete assessment but append: 'This sector requires compliance review by PragMind's AI Strategy Consultant before any implementation.'"},
+      {t:'Client expresses urgency or crisis',a:'Pause the structured assessment. Route to human strategy consultant immediately with a brief situation summary.'},
+    ]
+  },
+  {
+    id:'sage', icon:'🧠', name:'Sage', role:'RAG Knowledge Agent',
+    color:'#1A3D2E', accent:'#2EC67A',
+    mission:"PragMind's institutional memory. Answers questions using retrieval-augmented generation over PragMind's internal knowledge base with full source citations and confidence ratings.",
+    tags:[{t:'RAG / LLM',c:'#2EC67A'},{t:'Internal Knowledge',c:'#2EC67A'},{t:'LangChain',c:'#6B7A99'}],
+    inputHint:'Ask about PragMind services, past work, frameworks, or SOPs. Specify audience type if relevant.',
+    needs:['Question about PragMind services, past work, or frameworks','Audience type: internal team or client-facing (optional)','Specific document to search (optional)'],
+    wont:['Answer from general AI knowledge as PragMind expertise','Skip the confidence rating'],
+    scenario:"What frameworks does PragMind use for multi-agent systems, and do we have any case studies in financial services? Audience: internal team.",
+    schema_in:'Natural language question + optional audience type (internal / client) + optional document hint',
+    schema_out:'Sourced answer with inline citations + related PragMind work surfaced + Confidence rating (High/Medium/Low) + knowledge gap flag',
+    tools_ok:['ChromaDB / FAISS (vector retrieval)','LangChain RAG chain','GPT-4o (synthesis)','Notion knowledge base (read-only)'],
+    tools_no:['Internet / web search','CRM or client databases','Email or calendar systems','Any write access to the knowledge base'],
+    escalate:[
+      {t:'Confidence is Low on a client-facing question',a:"Append: 'This answer has low KB coverage. Recommend routing to relevant PragMind team member for verified response before sharing with client.'"},
+      {t:'Question involves client-specific confidential data',a:'Refuse to answer cross-client. Flag that a knowledge base partition may be needed.'},
+      {t:'Question is about pricing, contracts, or legal terms',a:"Route: 'ESCALATION REQUIRED — This requires review by PragMind management. I cannot interpret commercial or legal terms.'"},
+    ]
+  },
+  {
+    id:'atlas', icon:'📐', name:'Atlas', role:'Proposal Generator',
+    color:'#2D1F0A', accent:'#E0A835',
+    mission:"Converts discovery call notes into fully scoped, technically credible PragMind proposals. Knows the real service portfolio, tech stack, and delivery methodology. Same-day proposals at consistent quality.",
+    tags:[{t:'AI Consulting',c:'#E0A835'},{t:'Proposals',c:'#E0A835'},{t:'Pydantic AI',c:'#6B7A99'}],
+    inputHint:'Provide: discovery call notes, client industry, goals, tech environment, budget signal (high/medium/low), proposal audience.',
+    needs:['Discovery call notes (verbatim or summarised)','Client industry + stated goals','Tech environment and team capability','Budget signal (high / medium / low)','Proposal audience: technical / executive / mixed'],
+    wont:['Commit to specific pricing or timelines','Send directly — all outputs are DRAFTs for team review'],
+    scenario:"Run Atlas for a Dubai insurance company, 800 employees. They want to automate underwriting risk assessment (currently 100% manual, 3 days per application), improve claims fraud detection, and train their actuarial team on AI tools. Tech: Oracle database, some Python skills in data team, Power BI dashboards. Budget: high. Timeline: 9 months. Audience: mixed (CTO + CFO).",
+    schema_in:'Discovery notes + client industry + stated goals + tech environment + budget signal + proposal audience',
+    schema_out:'[DRAFT] 7-section proposal: Executive Summary, Proposed Solution, Team Composition, 3-Phase Delivery, Risk Register, Investment [TBC], Next Steps',
+    tools_ok:['GPT-4o (with PragMind service library context)','Notion / Google Docs output','Make.com (trigger on notes submission)','Pydantic AI (output validation)'],
+    tools_no:['Client CRM (write access)','Email send (never auto-send proposals)','Pricing databases','Legal or contract systems'],
+    escalate:[
+      {t:"Client goals conflict with PragMind's capabilities",a:"Flag in the proposal: 'Note for PragMind team: client has requested [X] which falls outside our current portfolio. Review before sending.'"},
+      {t:'Discovery notes are too vague to scope accurately',a:'Do not generate a partial proposal. Return CLARIFICATION REQUIRED followed by the 5–7 questions needed before scoping can begin.'},
+      {t:'Client operates in a regulated sector (healthcare, finance, government)',a:'Add a mandatory compliance section and flag: ESCALATION REQUIRED — compliance review needed before delivery.'},
+    ]
+  },
+  {
+    id:'pulse', icon:'📊', name:'Pulse', role:'Data Insight Narrator',
+    color:'#1A1045', accent:'#9B8FF8',
+    mission:"Transforms Power BI, Tableau, and raw data exports into weekly executive insight briefs under 300 words. Translates numbers into business language stakeholders can act on.",
+    tags:[{t:'Data Analytics',c:'#9B8FF8'},{t:'Power BI / Tableau',c:'#9B8FF8'},{t:'Retainer Service',c:'#6B7A99'}],
+    inputHint:'Provide: weekly metrics with prior week values, client business context, strategic priority, anomaly thresholds if defined.',
+    needs:['Weekly metrics with current and prior week values','Client industry, revenue scale, strategic priority','Anomaly threshold definitions (if set)'],
+    wont:['Diagnose root causes — correlates and flags only','Exceed 300 words — ever'],
+    scenario:"Run Pulse for a UAE e-commerce fashion retailer, AED 2M avg monthly revenue, strategic priority: increasing returning customer rate. This week: Revenue AED 487K (prev AED 447K), conversion 2.1% (prev 2.4%), cart abandonment 68% (prev 63%), AOV AED 312 (prev AED 274), new customers 890 (prev 820), returning customer orders 1,240 (prev 1,180), returns rate 4.2% (prev 2.4%).",
+    schema_in:'Weekly data export + client business context + prior week values + anomaly threshold definitions',
+    schema_out:'Weekly brief (<300 words): 1 headline decision prompt + 3 metric movements + why-it-matters + 1–2 recommended actions + anomaly flags',
+    tools_ok:['GPT-4o (narrative generation)','Python / pandas (data prep, read-only)','Power BI / Tableau API (read-only export)','Make.com (weekly trigger)'],
+    tools_no:['Direct database connections (PostgreSQL, MySQL etc.)','CRM write access','Client financial systems','Any tool that modifies source data'],
+    escalate:[
+      {t:'Metric moves more than 25% week-over-week',a:"Flag as ANOMALY ALERT. Do not attempt to explain. Include: 'This movement exceeds normal variance. Recommend urgent review by client data lead.'"},
+      {t:'Data export is missing, corrupted, or incomplete',a:'Do not generate a brief. Return: ESCALATION REQUIRED — data export issue detected. PragMind data team must be notified.'},
+      {t:'Business context document is outdated (>3 months)',a:"Flag at top of brief: 'Note: business context document was last updated [date]. Recommend PragMind review.'"},
+    ]
+  },
+  {
+    id:'forge', icon:'⚙️', name:'Forge', role:'Agentic Workflow Architect',
+    color:'#1A0A20', accent:'#D17DF5',
+    mission:"Designs complete multi-agent systems — technical architecture, individual agent specs with production-ready prompts, inter-agent communication protocols, and deployment blueprints.",
+    tags:[{t:'Agentic Workflows',c:'#D17DF5'},{t:'LangGraph / CrewAI',c:'#D17DF5'},{t:'Prompt Engineering',c:'#6B7A99'}],
+    inputHint:'Provide: client workflow description step by step, existing systems, team technical level, volume requirements, integration requirements.',
+    needs:['Client business process description (step by step)','Existing tools and systems in their environment','Team technical level (developers available?)','Volume and scale requirements','Integration requirements (what systems must it connect to?)'],
+    wont:['Write production application code','Design systems using tools outside PragMind stack'],
+    scenario:"Run Forge for a Dubai financial services client: they process 50 credit risk applications per day manually (each takes 45 mins). Process: receive application PDF → extract financials → check credit bureau data → cross-reference internal client history → calculate risk score using proprietary Excel model → generate underwriter recommendation report → log decision in Salesforce. They have PostgreSQL, credit bureau API, Salesforce CRM, and 2 Python developers.",
+    schema_in:'Client workflow description + pain points + existing tools/systems + team technical level + volume/scale + integration requirements',
+    schema_out:'Agent team overview + individual agent specs (role, input, output, tools, system prompt, escalation) + inter-agent communication protocol + deployment architecture + build estimate + failure mode analysis',
+    tools_ok:['GPT-4o (architecture reasoning)','LangGraph / CrewAI (framework spec)','FastAPI + React (deployment spec)','ChromaDB / FAISS / Zep (memory spec)'],
+    tools_no:['Code execution environments','Direct system access to client infrastructure','Auto-deployment or CI/CD pipelines','Any tool that directly modifies client systems'],
+    escalate:[
+      {t:'Process includes irreversible actions (financial transactions, data deletion)',a:"Add a mandatory HUMAN-IN-THE-LOOP gate. Flag: 'This system requires human confirmation design review before build.'"},
+      {t:'Required integration is with an unverified system',a:'Return: ESCALATION REQUIRED — Technical spike needed before architecture can be confirmed.'},
+      {t:"Client's volume exceeds single-agent capacity",a:"Design with parallel pattern and flag: 'At [X] volume, this requires load-tested deployment. Recommend PragMind Data Engineer review.'"},
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════════════
+// CONNECTION STATE
+// ═══════════════════════════════════════════════════════════
+let connectionMode = 'backend';  // 'backend' | 'direct'
+let backendUrl     = 'http://localhost:8000';
+let openaiKey      = '';
+let currentAgent   = 0;
+let conversations  = AGENTS.map(() => []);
+let isLoading      = false;
+
+// ═══════════════════════════════════════════════════════════
+// SETUP MODAL
+// ═══════════════════════════════════════════════════════════
+function setMode(mode) {
+  connectionMode = mode;
+  document.getElementById('modeBackendBtn').className = 'mode-btn ' + (mode==='backend'?'on':'off');
+  document.getElementById('modeDirectBtn').className  = 'mode-btn ' + (mode==='direct'?'on':'off');
+  document.getElementById('modeBackendBtn').textContent = (mode==='backend'?'●':'○') + ' BACKEND MODE';
+  document.getElementById('modeDirectBtn').textContent  = (mode==='direct'?'●':'○') + ' DIRECT MODE';
+  document.getElementById('backendSection').classList.toggle('hidden', mode!=='backend');
+  document.getElementById('directSection').classList.toggle('hidden',  mode!=='direct');
+}
+
+async function checkHealth() {
+  const url = document.getElementById('backendUrlInput').value.trim().replace(/\/$/,'');
+  const el  = document.getElementById('healthResult');
+  el.style.color = 'var(--muted)';
+  el.textContent = '…checking';
+  try {
+    const res  = await fetch(`${url}/health`, {signal: AbortSignal.timeout(5000)});
+    const data = await res.json();
+    el.style.color = 'var(--green)';
+    el.textContent = `✓ Connected — model: ${data.model} | agents: ${data.agents?.length || 5}`;
+  } catch(e) {
+    el.style.color = 'var(--red)';
+    el.textContent = `✗ Cannot reach ${url} — is the backend running?`;
+  }
+}
+
+function saveConfig() {
+  if (connectionMode === 'backend') {
+    const url = document.getElementById('backendUrlInput').value.trim().replace(/\/$/,'');
+    if (!url) { alert('Enter your backend URL'); return; }
+    backendUrl = url;
+    updateConnStatus('backend', url);
+  } else {
+    const k = document.getElementById('apiKeyInput').value.trim();
+    if (!k.startsWith('sk-')) { alert('Enter a valid OpenAI API key (starts with sk-)'); return; }
+    openaiKey = k;
+    updateConnStatus('direct', 'gpt-4o direct');
+  }
+  document.getElementById('setupModal').classList.add('hidden');
+}
+
+function openSetup() {
+  document.getElementById('setupModal').classList.remove('hidden');
+}
+
+function updateConnStatus(mode, label) {
+  const dot = document.getElementById('connDot');
+  const lbl = document.getElementById('connLabel');
+  if (mode === 'backend') {
+    dot.style.background = '#4A9EDB';
+    lbl.textContent = new URL(label).hostname;
+    lbl.style.color = '#4A9EDB';
+  } else {
+    dot.style.background = 'var(--green)';
+    lbl.textContent = label;
+    lbl.style.color = 'var(--green)';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// API LAYER — routes to backend or OpenAI based on mode
+// ═══════════════════════════════════════════════════════════
+async function callAgent(agentIdx, userMessage) {
+  const agent   = AGENTS[agentIdx];
+  const history = conversations[agentIdx];
+
+  if (connectionMode === 'backend') {
+    return await callBackend(agent, userMessage, history);
+  } else {
+    return await callOpenAIDirect(agent, userMessage, history);
+  }
+}
+
+// ── BACKEND PATH: POST /agents/run ──────────────────────────────────────────
+async function callBackend(agent, userMessage, history) {
+  const payload = {
+    agent:   agent.id,
+    message: userMessage,
+    history: history.map(m => ({ role: m.role, content: m.content }))
+  };
+
+  const res = await fetch(`${backendUrl}/agents/run`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `Backend error ${res.status}`);
+  }
+
+  const data = await res.json();
+
+  // data shape: { agent, response, escalation: { triggered, phrase, type } }
+  return {
+    text:      data.response,
+    escalation: data.escalation,
+    source:    'backend',
+    routedTo:  null
+  };
+}
+
+// ── DIRECT PATH: POST api.openai.com (fallback) ─────────────────────────────
+async function callOpenAIDirect(agent, userMessage, history) {
+  // System prompts are defined in the backend; for direct mode we re-embed them
+  const systemPrompts = {
+    axiom: `You are Axiom, PragMind AI's structured assessment agent. Conduct AI Readiness Assessments and produce scored, evidence-based maturity reports. Score clients across exactly 5 dimensions (0–20 each): Data Infrastructure, AI Governance, Technical Talent, Business Alignment, Operational Readiness. Output a scoring table, maturity tier (Exploring/Developing/Advanced), top 3 PragMind service recommendations, and a 90-day roadmap. NEVER promise ROI. NEVER design solutions. If crisis: respond ESCALATION REQUIRED.`,
+    sage:  `You are Sage, PragMind AI's RAG knowledge agent. Answer questions about PragMind's services, stack, and frameworks. Always include [Source: internal-knowledge] or [Source: inferred] citations. End every response with Confidence: High/Medium/Low. PragMind services: LLM/RAG Integration, Predictive Analytics, Data Engineering, AI Strategy, Upskilling, AI Application Development. Stack: LangChain, LangGraph, CrewAI, FastAPI, React, GPT-4o, ChromaDB, FAISS, Snowflake, Databricks. NEVER skip the confidence rating.`,
+    atlas: `You are Atlas, PragMind AI's proposal generator. ALL OUTPUTS ARE DRAFTS — include [DRAFT — REQUIRES PRAGMIND REVIEW BEFORE CLIENT DELIVERY] header. Produce 7-section proposals: 1.Executive Summary 2.Proposed Solution 3.Team Composition 4.Delivery Phases 5.Risk Register (3 specific risks) 6.Investment [TBC] 7.Next Steps. Use only PragMind's 6 services. NEVER commit to pricing. If vague input: respond CLARIFICATION REQUIRED and list questions.`,
+    pulse: `You are Pulse, PragMind AI's data insight narrator. Produce weekly executive briefs STRICTLY under 300 words. Structure: THIS WEEK'S HEADLINE (1 decision-prompt sentence) → WHAT MOVED (3 metrics with business translation) → WHY IT MATTERS (2-3 sentences) → RECOMMENDED ACTION (1-2 specific actions) → ANOMALY FLAGS. NEVER diagnose root causes. NEVER reproduce raw tables. If a metric moves >25%: flag as ANOMALY ALERT.`,
+    forge: `You are Forge, PragMind AI's agentic workflow architect. ALL OUTPUTS ARE ARCHITECTURAL SPECIFICATIONS — NOT PRODUCTION CODE. Include [ARCHITECTURAL SPECIFICATION — REQUIRES PRAGMIND DELIVERY TEAM REVIEW] header. Always produce: Agent Team Overview → Individual Agent Specifications (each with complete system prompt) → Inter-Agent Communication → Deployment Architecture table → Failure Mode Analysis. Use only PragMind's stack: LangGraph/CrewAI, GPT-4o/Claude, ChromaDB/FAISS, FastAPI, React. NEVER write production code. NEVER skip failure mode analysis.`
+  };
+
+  const messages = [
+    { role: 'system', content: systemPrompts[agent.id] },
+    ...history,
+    { role: 'user', content: userMessage }
+  ];
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method:  'POST',
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': `Bearer ${openaiKey}`
+    },
+    body: JSON.stringify({
+      model:      'gpt-4o',
+      messages,
+      max_tokens: agent.id === 'forge' ? 4096 : 2048,
+      temperature: 0.3
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `OpenAI error ${res.status}`);
+  }
+
+  const data = await res.json();
+  const text = data.choices[0].message.content;
+
+  // Run local escalation detection
+  const escInfo = detectEscalation(text);
+
+  return {
+    text,
+    escalation: escInfo
+      ? { triggered: true,  phrase: escInfo.phrase, type: escInfo.type }
+      : { triggered: false, phrase: null,            type: null },
+    source:   'direct',
+    routedTo: null
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// ESCALATION DETECTION (client-side mirror of backend logic)
+// ═══════════════════════════════════════════════════════════
+const ESC_MAP = {
+  'ESCALATION REQUIRED':              {label:'⚠️ Escalation Required',  cls:'esc-escalation',    msg:'This response requires human review before any action is taken.',     type:'escalation'},
+  'CLARIFICATION REQUIRED':           {label:'📋 Clarification Required', cls:'esc-clarification', msg:'More information is needed before this agent can proceed.',             type:'clarification'},
+  'ANOMALY ALERT':                    {label:'🚨 Anomaly Alert',          cls:'esc-anomaly',       msg:'Unusual data movement detected — verify before acting.',               type:'anomaly'},
+  'DRAFT — REQUIRES PRAGMIND REVIEW': {label:'📝 Draft Document',         cls:'esc-draft',         msg:'Do not send to clients without PragMind team review.',                 type:'draft'},
+};
+
+function detectEscalation(text) {
+  const upper = text.toUpperCase();
+  for (const [phrase, info] of Object.entries(ESC_MAP)) {
+    if (upper.includes(phrase)) return { ...info, phrase };
+  }
+  return null;
+}
+
+function escFromApi(esc) {
+  // Convert backend escalation object → UI info
+  if (!esc?.triggered) return null;
+  return Object.values(ESC_MAP).find(e => e.type === esc.type) || null;
+}
+
+// ═══════════════════════════════════════════════════════════
+// MARKDOWN RENDERER
+// ═══════════════════════════════════════════════════════════
+function renderMarkdown(text) {
+  let h = text
+    .replace(/\|(.+)\|\n\|[-| :]+\|\n((?:\|.+\|\n?)*)/g, (_, hdr, rows) => {
+      const th  = hdr.split('|').filter(c=>c.trim()).map(c=>`<th>${c.trim()}</th>`).join('');
+      const trs = rows.trim().split('\n').map(row => {
+        const cells = row.split('|').filter(c=>c.trim()).map(c=>`<td>${c.trim()}</td>`).join('');
+        return `<tr>${cells}</tr>`;
+      }).join('');
+      return `<table><thead><tr>${th}</tr></thead><tbody>${trs}</tbody></table>`;
+    })
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^# (.+)$/gm,'<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/```[\w]*\n?([\s\S]*?)```/g,'<pre><code>$1</code></pre>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/^[•\-\*] (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/s, m=>`<ul>${m}</ul>`)
+    .replace(/^\d+\. (.+)$/gm,'<li>$1</li>')
+    .replace(/^---$/gm,'<hr>')
+    .replace(/\n\n+/g,'</p><p>')
+    .replace(/\n/g,'<br>');
+  if (!h.startsWith('<')) h = `<p>${h}</p>`;
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
+function renderSidebar() {
+  document.getElementById('agentNav').innerHTML = AGENTS.map((a,i) => `
+    <button class="agent-btn${i===currentAgent?' active':''}" onclick="selectAgent(${i})">
+      <div class="a-icon-wrap" style="background:${a.color}">${a.icon}</div>
+      <div class="a-info">
+        <div class="a-name">${a.name}</div>
+        <div class="a-role">${a.role}</div>
+      </div>
+      <div class="status-dot"></div>
+    </button>`).join('');
+}
+
+function renderTopbar() {
+  const a = AGENTS[currentAgent];
+  document.getElementById('topbar').innerHTML = `
+    <div class="topbar-icon" style="background:${a.color}">${a.icon}</div>
+    <div class="topbar-meta">
+      <div class="topbar-name" style="color:${a.accent}">${a.name}
+        <span style="color:var(--muted);font-weight:400;font-size:12px"> — ${a.role}</span></div>
+      <div class="topbar-role">${a.mission.substring(0,88)}…</div>
+    </div>
+    <div class="topbar-tags">
+      ${a.tags.map(t=>`<span class="tag" style="color:${t.c};border-color:${t.c}33;background:${t.c}11">${t.t}</span>`).join('')}
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-ghost" onclick="clearConversation()">Clear</button>
+      <button class="btn-ghost" onclick="exportPDF()" style="color:${a.accent};border-color:${a.accent}33">↓ Export PDF</button>
+    </div>`;
+}
+
+function renderInfoPanel() {
+  const a = AGENTS[currentAgent];
+  document.getElementById('infoPanel').innerHTML = `
+    <div class="info-section">
+      <div class="info-title green-title"><span class="info-title-dot"></span>What it does</div>
+      <ul class="do-list">
+        ${AGENTS[currentAgent].needs.map(n=>`<li class="do-item"><span class="item-mark">✓</span><div class="item-text">${n}</div></li>`).join('')}
+      </ul>
+    </div>
+    <div class="info-section">
+      <div class="info-title red-title"><span class="info-title-dot"></span>What it must not do</div>
+      <ul class="dont-list">
+        ${a.wont.map(w=>`<li class="dont-item"><span class="item-mark">✗</span><div class="item-text">${w}</div></li>`).join('')}
+      </ul>
+    </div>
+    <div class="info-section">
+      <div class="info-title muted-title">Input / Output schema</div>
+      <div class="schema-item"><div class="schema-lbl">Input</div><div class="schema-val">${a.schema_in}</div></div>
+      <div class="schema-item"><div class="schema-lbl">Output</div><div class="schema-val">${a.schema_out}</div></div>
+    </div>
+    <div class="info-section">
+      <div class="info-title muted-title">Tool permissions</div>
+      ${a.tools_ok.map(t=>`<div class="tool-row"><span class="tool-badge tool-ok">✓ ${t}</span></div>`).join('')}
+      ${a.tools_no.map(t=>`<div class="tool-row"><span class="tool-badge tool-no">✗ ${t}</span></div>`).join('')}
+    </div>
+    <div class="info-section">
+      <div class="info-title amber-title"><span class="info-title-dot"></span>Escalation conditions</div>
+      ${a.escalate.map(e=>`<div class="esc-item"><div class="esc-trigger">TRIGGER: ${e.t}</div><div class="esc-action">→ ${e.a}</div></div>`).join('')}
+    </div>`;
+}
+
+function renderChat() {
+  const a   = AGENTS[currentAgent];
+  const conv = conversations[currentAgent];
+  const el  = document.getElementById('messages');
+
+  if (conv.length === 0) {
+    el.innerHTML = `
+      <div class="onboarding">
+        <div class="ob-icon">${a.icon}</div>
+        <div class="ob-name" style="color:${a.accent}">${a.name}</div>
+        <div class="ob-mission">${a.mission}</div>
+        <div class="ob-cards">
+          <div class="ob-card">
+            <div class="ob-card-title needs">What I need from you</div>
+            <ul>${a.needs.map(n=>`<li>${n}</li>`).join('')}</ul>
+          </div>
+          <div class="ob-card">
+            <div class="ob-card-title wont">What I will not do</div>
+            <ul>${a.wont.map(w=>`<li>${w}</li>`).join('')}</ul>
+          </div>
+        </div>
+        <button class="ob-scenario-btn"
+          style="color:${a.accent};border-color:${a.accent}44;background:${a.color}88"
+          onclick="loadScenario(${currentAgent})">▶ Load sample scenario</button>
+      </div>`;
+  } else {
+    el.innerHTML = conv.map(m => {
+      if (m.role === 'user') {
+        return `<div class="msg-user"><div class="bubble">${m.content.replace(/\n/g,'<br>')}</div></div>`;
+      }
+      const escInfo = escFromApi(m.escalation) || detectEscalation(m.content);
+      const badge   = m.routedTo
+        ? `<div class="routing-badge"><div class="routing-badge-dot" style="background:${AGENTS.find(x=>x.id===m.routedTo)?.accent||'var(--dim)'}"></div>routed → ${m.routedTo}</div>`
+        : '';
+      const banner  = escInfo
+        ? `<div class="esc-banner ${escInfo.cls}"><div class="esc-banner-label">${escInfo.label}</div>${escInfo.msg}</div>`
+        : '';
+      return `<div class="msg-agent">${badge}<div class="agent-label">${a.name}</div>${banner}<div class="agent-bubble">${renderMarkdown(m.content)}</div></div>`;
+    }).join('');
+    setTimeout(() => el.scrollTop = el.scrollHeight, 50);
+  }
+
+  document.getElementById('inputHint').textContent = a.inputHint;
+  document.getElementById('sendBtn').style.background = a.accent;
+  document.getElementById('sendBtn').style.color = a.color;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════════════════════
+function selectAgent(idx) {
+  currentAgent = idx;
+  renderSidebar(); renderTopbar(); renderInfoPanel(); renderChat();
+}
+
+function loadScenario(idx) {
+  const ta = document.getElementById('inputBox');
+  ta.value = AGENTS[idx].scenario;
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
+  ta.focus();
+}
+
+function clearConversation() {
+  conversations[currentAgent] = [];
+  renderChat();
+}
+
+async function sendMessage() {
+  if (isLoading) return;
+  const ta  = document.getElementById('inputBox');
+  const msg = ta.value.trim();
+  if (!msg) return;
+
+  ta.value = ''; ta.style.height = '42px';
+  conversations[currentAgent].push({ role: 'user', content: msg });
+  isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  // Render user message immediately
+  const el = document.getElementById('messages');
+  el.innerHTML = conversations[currentAgent].map(m => {
+    if (m.role === 'user')
+      return `<div class="msg-user"><div class="bubble">${m.content.replace(/\n/g,'<br>')}</div></div>`;
+    const escInfo = escFromApi(m.escalation) || detectEscalation(m.content);
+    const banner  = escInfo ? `<div class="esc-banner ${escInfo.cls}"><div class="esc-banner-label">${escInfo.label}</div>${escInfo.msg}</div>` : '';
+    return `<div class="msg-agent"><div class="agent-label">${AGENTS[currentAgent].name}</div>${banner}<div class="agent-bubble">${renderMarkdown(m.content)}</div></div>`;
+  }).join('');
+
+  // Append typing indicator
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'msg-agent'; typingDiv.id = 'typing';
+  typingDiv.innerHTML = `<div class="agent-label">${AGENTS[currentAgent].name}</div><div class="typing"><span></span><span></span><span></span></div>`;
+  el.appendChild(typingDiv);
+  el.scrollTop = el.scrollHeight;
+
+  try {
+    const result = await callAgent(currentAgent, msg);
+    conversations[currentAgent].push({
+      role:      'assistant',
+      content:   result.text,
+      escalation: result.escalation,
+      routedTo:  result.routedTo,
+      source:    result.source
+    });
+  } catch(err) {
+    conversations[currentAgent].push({
+      role:    'assistant',
+      content: `⚠️ Agent unavailable — ${err.message}\n\nCheck that your ${connectionMode==='backend'?'backend server is running':'OpenAI API key is valid'}.`,
+      escalation: { triggered: false }
+    });
+  }
+
+  isLoading = false;
+  document.getElementById('sendBtn').disabled = false;
+  renderChat();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+// ═══════════════════════════════════════════════════════════
+// EXPORT PDF
+// ═══════════════════════════════════════════════════════════
+function exportPDF() {
+  const a    = AGENTS[currentAgent];
+  const conv = conversations[currentAgent];
+  if (!conv.length) { showToast('No conversation to export'); return; }
+
+  const date    = new Date().toISOString().split('T')[0];
+  const isAtlas = a.id === 'atlas';
+  const isAxiom = a.id === 'axiom';
+  const mode    = connectionMode === 'backend' ? `Backend (${backendUrl})` : 'Direct (OpenAI gpt-4o)';
+
+  const body = conv.map(m => {
+    if (m.role === 'user')
+      return `<div class="msg-src">INPUT</div><div class="user-msg">${m.content.replace(/\n/g,'<br>')}</div><hr>`;
+    return `<div class="msg-src">${a.name.toUpperCase()}</div><div class="agent-resp">${renderMarkdown(m.content)}</div><hr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;color:#1a2035;padding:38px}
+    .pdf-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:18px;border-bottom:2px solid #1a2035;margin-bottom:26px}
+    .pdf-brand{font-size:10px;color:#6B7A99;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+    .pdf-title{font-size:20px;font-weight:700;color:#1a2035}
+    .pdf-role{font-size:11px;color:#6B7A99;margin-top:3px}
+    .pdf-meta{text-align:right;font-size:10px;color:#9BABC8;line-height:1.7}
+    .msg-src{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#9BABC8;font-family:monospace;margin-bottom:5px}
+    .user-msg{background:#f4f6fa;border-radius:7px;padding:11px 15px;font-size:13px;line-height:1.6;margin-bottom:12px}
+    .agent-resp{font-size:13px;line-height:1.75;margin-bottom:14px}
+    .agent-resp h3{font-size:13px;font-weight:700;margin:14px 0 6px}
+    .agent-resp table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}
+    .agent-resp th{font-family:monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#6B7A99;padding:7px 10px;border-bottom:1px solid #e0e4ee;text-align:left}
+    .agent-resp td{padding:6px 10px;border-bottom:1px solid #f0f2f8;color:#1a2035;line-height:1.5}
+    .agent-resp strong{font-weight:700}
+    .agent-resp pre{font-family:monospace;font-size:11px;background:#f4f6fa;padding:12px;border-radius:6px;margin:8px 0;overflow-x:auto}
+    hr{border:none;border-top:1px solid #e8ecf4;margin:14px 0}
+    ${isAtlas?'.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-45deg);font-size:88px;color:rgba(0,0,0,.05);font-weight:900;z-index:-1;white-space:nowrap}':''}
+    .draft-banner{background:#FFF8E1;border:1px solid #E0A835;border-radius:7px;padding:11px 15px;margin-bottom:22px;font-size:12px;color:#7A5000;font-weight:600}
+    .footer{margin-top:28px;padding-top:12px;border-top:1px solid #e8ecf4;display:flex;justify-content:space-between;font-size:10px;color:#9BABC8;font-family:monospace}
+  </style></head><body>
+  ${isAtlas?'<div class="watermark">DRAFT</div>':''}
+  <div class="pdf-header">
+    <div>
+      <div class="pdf-brand">PragMind AI · Dubai</div>
+      <div class="pdf-title">${isAxiom?'AI Readiness Assessment Report':isAtlas?'Client Proposal [DRAFT]':a.name+' — '+a.role}</div>
+      <div class="pdf-role">${a.role}</div>
+    </div>
+    <div class="pdf-meta">Generated: ${date}<br>Mode: ${mode}<br>Internal use only</div>
+  </div>
+  ${isAtlas?'<div class="draft-banner">⚠ DRAFT — This document requires PragMind team review before client delivery.</div>':''}
+  ${body}
+  <div class="footer">
+    <span>PragMind AI · Confidential · Internal Use Only</span>
+    <span>PragMind_${a.name}_${date}.pdf</span>
+  </div></body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(html); w.document.close();
+  setTimeout(() => w.print(), 500);
+  showToast(`Export ready — PragMind_${a.name}_${date}`);
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+renderSidebar(); renderTopbar(); renderInfoPanel(); renderChat();
